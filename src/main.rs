@@ -1,6 +1,6 @@
 use std::fs;
 
-use std::cmp::{Ordering, Reverse};
+use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap};
 
 #[derive(Clone, Debug)]
@@ -33,6 +33,8 @@ fn main() {
     println!("counter : {counter:?} \n");
     let root = build_huffman_tree(&counter);
     println!("{root:?}");
+    let table = build_prefix_table(root);
+    println!("\n {table:?}");
 }
 
 fn count_characters_frequency(text: &str) -> HashMap<char, u64> {
@@ -71,4 +73,28 @@ fn build_huffman_tree(counter: &HashMap<char, u64>) -> TreeNode {
     }
 
     return heap.pop().unwrap();
+}
+fn build_prefix_table(root: TreeNode) -> HashMap<char, String> {
+    let mut table = HashMap::new();
+
+    fn dfs(node: TreeNode, path: &mut Vec<char>, table: &mut HashMap<char, String>) {
+        if node.left.is_none() && node.right.is_none() {
+            table.insert(node.char.unwrap(), path.iter().collect::<String>());
+        }
+        if let Some(n) = node.left {
+            path.push('0');
+            dfs(*n, path, table);
+            path.pop();
+        }
+        if let Some(n) = node.right {
+            path.push('1');
+            dfs(*n, path, table);
+            path.pop();
+        }
+    }
+
+    let mut path = vec![];
+    dfs(root, &mut path, &mut table);
+
+    return table;
 }
